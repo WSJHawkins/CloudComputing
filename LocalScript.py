@@ -10,6 +10,7 @@ import boto3
 import json
 from pkg_resources import resource_filename
 import time
+import keyboard
 
 def isANum(a,min,max):
     try:
@@ -65,6 +66,7 @@ def get_region_name(region_code):
 
 #Fixed
 OpsPerSec = 337815
+costPerHour = float(get_price(get_region_name('us-east-1'), 't2.micro' , 'Linux'))
 print("Welcome To Golden Nonce Discovery!")
 
 difficulty = input ("What difficulty would you like: ")
@@ -111,7 +113,6 @@ elif mode == 3:
 
     # Use AWS Pricing API at US-East-1
     client = boto3.client('pricing', region_name='us-east-1')
-    costPerHour = float(get_price(get_region_name('us-east-1'), 't2.micro' , 'Linux'))
     expenditure = input("Enter max hourly rate of expenditure (in cents). One VM is "+str(costPerHour) +" cents per hour : ")
     while (not isAFloat(expenditure,0,9999)):
         print("Invalid Input - Please enter a postive integer")
@@ -122,6 +123,29 @@ elif mode == 3:
     #could include SQS Pricing too
 
 
+limits = input("Do you wish to set any limits. Enter 0 for no limits, 1 for a time limit, 2 for a spend limit: ")
+while (not isANum(limits,0,2)):
+    limits = input("Invalid Input - Please enter either 0, 1 or 2: ")
+limits = int(limits)
+timeLimit = -1 #stands for no limit
+if(limits == 1):
+    timeLimit = input("Enter a time limit (in seconds): ")
+    while (not isAFloat(timeLimit,0.01,999999)):
+        print("Invalid Input - Please enter a number greater than 0.01")
+        timeLimit = input("Enter a time limit  (in seconds): ")
+    timeLimit = float(timeLimit)
+elif(limits == 2):
+    costLimit = input("Enter max spend limit (in cents): ")
+    while (not isAFloat(costLimit,0,9999)):
+        print("Invalid Input - Please enter a postive integer")
+        costLimit = input("Enter max spend limit (in cents): ")
+    costLimit = float(costLimit)
+    timeLimit = costLimit/(costPerHour*numberOfVMs) * 60 * 60
+
+
+##START ACTUAL CND SYSTEM
+print("Starting Up Now with difficulty " + str(difficulty) + ", and "+str(numberOfVMs+"VMS "))
+print("Press 'Esc' at any point to initate a scram and shut the program down")
 # Get the service resource
 sqs = boto3.resource('sqs')
 ec2 = boto3.resource('ec2')
@@ -157,8 +181,19 @@ for j in range(0,numberOfVMs):
         response = sendQueue.send_message(MessageBody=x)
 
 
-while (nonceFound == False):
-  
+scramInitiate = False
+while (nonceFound == False and scramInitiate == False):
+    
+    if(keyboard.is_pressed('Esc')):
+        answer = input ("Are you sure you want to intiate a Scram? Enter 'Y' to confirm: ")
+        if(answer == 'Y' or answer == 'y'):
+            print("Starting Scram")
+            scramInitiate = True
+    
+    if((time.time()-start) > timeLimit):
+        print("Time/Cost Limit reached - Initiating Scram")
+        scramInitiate = True #init
+            
     ####Check Responses
     message = receiveQueue.receive_messages(MaxNumberOfMessages=1)
     if(len(message) > 0):
