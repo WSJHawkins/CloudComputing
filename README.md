@@ -17,6 +17,25 @@ You need to create an IAM role with AWS that has permissions to create, read, wr
 
 Set up a security group which allows no outside connects and call it 'NoOutsideCOnnections', if the name is not possible update the LocalScript.py with the name of the group.
 
+To start the program run `python LocalScript.py` and enter the parameters it asks for.
+```shell
+Welcome To Golden Nonce Discovery!
+
+What difficulty would you like: 26
+Which Mode would you like: 
+    1. Specify how many VMs to use
+    2. Specify desired time and confidence level
+    3. Specify maximum hourly rate of expenditure
+
+Enter Number Of Mode: 1
+
+Enter Number of VMs to use: 5
+
+Do you wish to set any limits. Enter 0 for no limits, 1 for a time limit, 2 for a spend limit: 0
+Starting Up Now with difficulty 26, and 5 VMS
+Press 'Esc' at any point to initate a scram and shut the program down
+ ```
+## Troubleshooting
 The ami used is public but if needed, you can recreate the ami by:
   1. Launching a 't2.micro' instance with the 'Amazon Linux 2' Image using your own SSH keys.
   2. SSH into the instance once it has started.
