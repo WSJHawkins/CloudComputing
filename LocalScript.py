@@ -190,7 +190,7 @@ while (nonceFound == False and scramInitiate == False):
             print("Starting Scram")
             scramInitiate = True
     
-    if((time.time()-start) > timeLimit):
+    if((time.time()-start) > timeLimit and timeLimit != -1):
         print("Time/Cost Limit reached - Initiating Scram")
         scramInitiate = True #init
             
