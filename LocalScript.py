@@ -65,7 +65,8 @@ def get_region_name(region_code):
     
 
 #Fixed
-OpsPerSec = 337815
+OpsPerSec = 277813
+client = boto3.client('pricing', region_name='us-east-1')
 costPerHour = float(get_price(get_region_name('us-east-1'), 't2.micro' , 'Linux'))
 print("Welcome To Golden Nonce Discovery!")
 
@@ -94,10 +95,11 @@ if mode == 1:
     
 elif mode == 2:
     desiredTime = input("Enter desired time (in seconds): ")
-    while (not isAFloat(desiredTime,0.01,9999)):
-        print("Invalid Input - Please enter a number greater than 0.01")
+    while (not isAFloat(desiredTime,60,999999)):
+        print("Invalid Input - Please enter a number greater than 60 (59 Seconds needed to start up VM)")
         desiredTime = input("Enter desired time (in seconds): ")
     desiredTime = float(desiredTime)
+    desiredTime = desiredTime - 59
     confidence = input("Enter Confidence Level (in percent) - e.g. 95.0: ")
     while (not isAFloat(confidence,0,99.999)):
         print("Invalid Input - Please enter a postive number from 1 - 99.999")
@@ -111,8 +113,6 @@ elif mode == 2:
     
 elif mode == 3:
 
-    # Use AWS Pricing API at US-East-1
-    client = boto3.client('pricing', region_name='us-east-1')
     expenditure = input("Enter max hourly rate of expenditure (in cents). One VM is "+str(costPerHour) +" cents per hour : ")
     while (not isAFloat(expenditure,0,9999)):
         print("Invalid Input - Please enter a postive integer")
@@ -144,7 +144,7 @@ elif(limits == 2):
 
 
 ##START ACTUAL CND SYSTEM
-print("Starting Up Now with difficulty " + str(difficulty) + ", and "+str(numberOfVMs+"VMS "))
+print("Starting Up Now with difficulty " + str(difficulty) + ", and " +str(numberOfVMs)+" VMS")
 print("Press 'Esc' at any point to initate a scram and shut the program down")
 # Get the service resource
 sqs = boto3.resource('sqs')
